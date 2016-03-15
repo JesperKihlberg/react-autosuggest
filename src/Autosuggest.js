@@ -247,6 +247,21 @@ class Autosuggest extends Component {
             break;
           }
 
+          case 'ArrowRight': {
+            const focusedSuggestion = this.getFocusedSuggestion();
+
+            if (focusedSuggestion !== null) {
+              onSuggestionSelected(event, {
+                suggestion: focusedSuggestion,
+                suggestionValue: value,
+                method: 'arrowRight'
+              });
+              updateFocusedSuggestion(0, 0, value);
+              this.maybeCallOnSuggestionsUpdateRequested({ value, reason: 'enter' });
+            }
+            break;
+          }
+
           case 'Escape':
             if (isOpen) {
               // If input.type === 'search', the browser clears the input
