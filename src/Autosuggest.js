@@ -10,6 +10,8 @@ function mapStateToProps(state) {
     isCollapsed: state.isCollapsed,
     focusedSectionIndex: state.focusedSectionIndex,
     focusedSuggestionIndex: state.focusedSuggestionIndex,
+    focusedSubItemIndex: state.focusedSubItemIndex,
+    isPrimaryFocused: state.isPrimaryFocused,
     valueBeforeUpDown: state.valueBeforeUpDown,
     lastAction: state.lastAction
   };
@@ -26,8 +28,8 @@ function mapDispatchToProps(dispatch) {
     inputChanged: (shouldRenderSuggestions, lastAction) => {
       dispatch(inputChanged(shouldRenderSuggestions, lastAction));
     },
-    updateFocusedSuggestion: (sectionIndex, suggestionIndex, value) => {
-      dispatch(updateFocusedSuggestion(sectionIndex, suggestionIndex, value));
+    updateFocusedSuggestion: (sectionIndex, suggestionIndex, subItemIndex, isPrimaryFocused, value) => {
+      dispatch(updateFocusedSuggestion(sectionIndex, suggestionIndex, subItemIndex, isPrimaryFocused, value));
     },
     revealSuggestions: () => {
       dispatch(revealSuggestions());
@@ -41,13 +43,19 @@ function mapDispatchToProps(dispatch) {
 class Autosuggest extends Component {
   static propTypes = {
     suggestions: PropTypes.array.isRequired,
+    subItems: PropTypes.array,
     onSuggestionsUpdateRequested: PropTypes.func.isRequired,
     getSuggestionValue: PropTypes.func.isRequired,
+    getSubItemValue: PropTypes.func,
     renderSuggestion: PropTypes.func.isRequired,
+    renderSubItem: PropTypes.func,
     inputProps: PropTypes.object.isRequired,
     shouldRenderSuggestions: PropTypes.func.isRequired,
     onSuggestionSelected: PropTypes.func.isRequired,
+    onSubItemSelected: PropTypes.func,
     multiSection: PropTypes.bool.isRequired,
+    multiLevel: PropTypes.bool,
+    isPrimaryFocused: PropTypes.bool,
     renderSectionTitle: PropTypes.func.isRequired,
     getSectionSuggestions: PropTypes.func.isRequired,
     focusInputOnSuggestionClick: PropTypes.bool.isRequired,
@@ -59,6 +67,7 @@ class Autosuggest extends Component {
     isCollapsed: PropTypes.bool.isRequired,
     focusedSectionIndex: PropTypes.number,
     focusedSuggestionIndex: PropTypes.number,
+    focusedSubItemIndex: PropTypes.number,
     valueBeforeUpDown: PropTypes.string,
     lastAction: PropTypes.string,
 
@@ -99,6 +108,12 @@ class Autosuggest extends Component {
     return suggestions[suggestionIndex];
   }
 
+  getSubItem(subItemIndex) {
+    const { subItems } = this.props;
+
+    return subItems[subItemIndex];
+  }
+
   getFocusedSuggestion() {
     const { focusedSectionIndex, focusedSuggestionIndex } = this.props;
 
@@ -109,10 +124,26 @@ class Autosuggest extends Component {
     return this.getSuggestion(focusedSectionIndex, focusedSuggestionIndex);
   }
 
+  getFocusedSubItem() {
+    const { focusedSubItemIndex, isPrimaryFocused } = this.props;
+
+    if (focusedSubItemIndex === null || isPrimaryFocused) {
+      return null;
+    }
+
+    return this.getSubItem(focusedSubItemIndex);
+  }
+
   getSuggestionValueByIndex(sectionIndex, suggestionIndex) {
     const { getSuggestionValue } = this.props;
 
     return getSuggestionValue(this.getSuggestion(sectionIndex, suggestionIndex));
+  }
+
+  getSubItemValueByIndex(subItemIndex) {
+    const { getSubItemValue } = this.props;
+
+    return getSubItemValue(this.getSubItem(subItemIndex));
   }
 
   getSuggestionIndices(suggestionElement) {
@@ -174,16 +205,17 @@ class Autosuggest extends Component {
 
   render() {
     const {
-      suggestions, renderSuggestion, inputProps, shouldRenderSuggestions,
-      onSuggestionSelected, multiSection, renderSectionTitle, id,
+      suggestions, subItems, renderSuggestion, renderSubItem, inputProps, shouldRenderSuggestions,
+      onSuggestionSelected, onSubItemSelected, multiSection, multiLevel, renderSectionTitle, id,
       getSectionSuggestions, focusInputOnSuggestionClick, theme, isFocused,
-      isCollapsed, focusedSectionIndex, focusedSuggestionIndex,
+      isCollapsed, focusedSectionIndex, focusedSuggestionIndex, focusedSubItemIndex, isPrimaryFocused,
       valueBeforeUpDown, inputFocused, inputBlurred, inputChanged,
       updateFocusedSuggestion, revealSuggestions, closeSuggestions
     } = this.props;
     const { value, onBlur, onFocus, onKeyDown } = inputProps;
     const isOpen = isFocused && !isCollapsed && this.willRenderSuggestions();
     const items = (isOpen ? suggestions : []);
+    const localSubItems = (isOpen ? subItems : []);
     const autowhateverInputProps = {
       ...inputProps,
       onFocus: event => {
@@ -220,44 +252,76 @@ class Autosuggest extends Component {
               if (this.willRenderSuggestions()) {
                 revealSuggestions();
               }
-            } else if (suggestions.length > 0) {
-              const { newFocusedSectionIndex, newFocusedItemIndex } = data;
-              const newValue = newFocusedItemIndex === null ?
-                valueBeforeUpDown :
-                this.getSuggestionValueByIndex(newFocusedSectionIndex, newFocusedItemIndex);
+            } else if (suggestions && suggestions.length > 0) {
+              const { newFocusedSectionIndex, newFocusedItemIndex, newFocusedSubItemIndex, focusedSectionIndex, focusedItemIndex, isPrimaryFocused } = data;
 
-              updateFocusedSuggestion(newFocusedSectionIndex, newFocusedItemIndex, value);
-              this.maybeCallOnChange(event, newValue, event.key === 'ArrowDown' ? 'down' : 'up');
+              if (isPrimaryFocused) {
+                const newValue = newFocusedItemIndex === null ?
+                    valueBeforeUpDown :
+                    this.getSuggestionValueByIndex(newFocusedSectionIndex, newFocusedItemIndex);
+
+                updateFocusedSuggestion(newFocusedSectionIndex, newFocusedItemIndex, null, isPrimaryFocused, value);
+                this.maybeCallOnChange(event, newValue, event.key === 'ArrowDown' ? 'down' : 'up');
+              } else {
+                const newValue = newFocusedSubItemIndex === null ?
+                    valueBeforeUpDown :
+                    this.getSubItemValueByIndex(newFocusedSubItemIndex);
+                    
+                updateFocusedSuggestion(focusedSectionIndex, focusedItemIndex, newFocusedSubItemIndex, isPrimaryFocused, value);
+                this.maybeCallOnChange(event, newValue, event.key === 'ArrowDown' ? 'down' : 'up');
+              }
             }
             event.preventDefault();
             break;
+          case 'ArrowRight': {
+            const { newFocusedSectionIndex, newFocusedItemIndex, newFocusedSubItemIndex, isPrimaryFocused } = data;
 
+            if (subItems && subItems.length > 0) {
+              const newValue = this.getSubItemValueByIndex(0);
+
+              updateFocusedSuggestion(newFocusedSectionIndex, newFocusedItemIndex, newFocusedSubItemIndex, isPrimaryFocused, value);
+              this.maybeCallOnChange(event, newValue, 'right');
+            }
+            break;
+          }
+          case 'ArrowLeft': {
+            const { newFocusedSectionIndex, newFocusedItemIndex, newFocusedSubItemIndex, isPrimaryFocused } = data;
+            const newValue = this.getSuggestionValueByIndex(newFocusedSectionIndex, newFocusedItemIndex);
+
+            updateFocusedSuggestion(newFocusedSectionIndex, newFocusedItemIndex, newFocusedSubItemIndex, isPrimaryFocused, value);
+            this.maybeCallOnChange(event, newValue, 'left');
+            break;
+          }
           case 'Enter': {
             const focusedSuggestion = this.getFocusedSuggestion();
 
             if (focusedSuggestion !== null) {
+              const { isPrimaryFocused } = data;
+
               closeSuggestions('enter');
-              onSuggestionSelected(event, {
-                suggestion: focusedSuggestion,
-                suggestionValue: value,
-                method: 'enter'
-              });
-              this.maybeCallOnSuggestionsUpdateRequested({ value, reason: 'enter' });
-            }
-            break;
-          }
+              if (isPrimaryFocused) {
+                const focusedSuggestionValue = this.props.getSuggestionValue(focusedSuggestion);
 
-          case 'ArrowRight': {
-            const focusedSuggestion = this.getFocusedSuggestion();
+                onSuggestionSelected(event, {
+                  suggestion: focusedSuggestion,
+                  suggestionValue: focusedSuggestionValue,
+                  method: 'enter'
+                });
+                this.maybeCallOnSuggestionsUpdateRequested({ value, reason: 'enter' });
+              } else {
+                const focusedSubItem = this.getFocusedSubItem();
 
-            if (focusedSuggestion !== null) {
-              onSuggestionSelected(event, {
-                suggestion: focusedSuggestion,
-                suggestionValue: value,
-                method: 'arrowRight'
-              });
-              updateFocusedSuggestion(0, 0, value);
-              this.maybeCallOnSuggestionsUpdateRequested({ value, reason: 'enter' });
+                if (focusedSubItem) {
+                  const focusedSubItemValue = this.props.getSubItemValue(focusedSubItem);
+
+                  this.maybeCallOnChange(event, focusedSubItemValue, 'enter');
+                  onSubItemSelected(event, {
+                    subItem: focusedSubItem,
+                    subItemValue: focusedSubItemValue,
+                    method: 'enter'
+                  });
+                }
+              }
             }
             break;
           }
@@ -287,27 +351,59 @@ class Autosuggest extends Component {
         onKeyDown && onKeyDown(event);
       }
     };
-    const onMouseEnter = (event, { sectionIndex, itemIndex }) => {
-      updateFocusedSuggestion(sectionIndex, itemIndex);
+    const onMouseEnter = (event, { sectionIndex, itemIndex, subItemIndex, isPrimaryFocused }) => {
+      updateFocusedSuggestion(sectionIndex, itemIndex, subItemIndex, isPrimaryFocused);
+      if (isPrimaryFocused) {
+        const newValue = itemIndex === null ?
+          valueBeforeUpDown :
+          this.getSuggestionValueByIndex(sectionIndex, itemIndex);
+
+        updateFocusedSuggestion(sectionIndex, itemIndex, null, isPrimaryFocused, value);
+        this.maybeCallOnChange(event, newValue, 'mouseEnter');
+      } else {
+        const newValue = subItemIndex === null ?
+          valueBeforeUpDown :
+          this.getSubItemValueByIndex(subItemIndex);
+
+        updateFocusedSuggestion(sectionIndex, itemIndex, subItemIndex, isPrimaryFocused, value);
+        this.maybeCallOnChange(event, newValue, 'mouseEnterSubMenu');
+      }
     };
-    const onMouseLeave = () => {
-      updateFocusedSuggestion(null, null);
+    const onMouseLeave = (event, { isPrimaryFocused }) => {
+      updateFocusedSuggestion(null, null, null, true);
+      const method = isPrimaryFocused ? 'mouseLeave' : 'mouseLeaveSubMenu';
+
+      this.maybeCallOnChange(event, null, method);
     };
     const onMouseDown = () => {
       this.justClickedOnSuggestion = true;
     };
-    const onClick = event => {
-      const { sectionIndex, suggestionIndex } =
-        this.getSuggestionIndices(this.findSuggestionElement(event.target));
-      const clickedSuggestion = this.getSuggestion(sectionIndex, suggestionIndex);
-      const clickedSuggestionValue = this.props.getSuggestionValue(clickedSuggestion);
+    const onClick = (event, { sectionIndex, itemIndex, subItemIndex, isPrimaryFocused }) => {
+      let value;
 
-      this.maybeCallOnChange(event, clickedSuggestionValue, 'click');
-      onSuggestionSelected(event, {
-        suggestion: clickedSuggestion,
-        suggestionValue: clickedSuggestionValue,
-        method: 'click'
-      });
+      if (isPrimaryFocused) {
+        const clickedSuggestion = this.getSuggestion(sectionIndex, itemIndex);
+        const clickedSuggestionValue = this.props.getSuggestionValue(clickedSuggestion);
+
+        value = clickedSuggestionValue;
+        this.maybeCallOnChange(event, clickedSuggestionValue, 'click');
+        onSuggestionSelected(event, {
+          suggestion: clickedSuggestion,
+          suggestionValue: clickedSuggestionValue,
+          method: 'click'
+        });
+      } else {
+        const clickedSubItem = this.getSubItem(subItemIndex);
+        const clickedSubItemValue = this.props.getSubItemValue(clickedSubItem);
+
+        value = clickedSubItemValue;
+        this.maybeCallOnChange(event, clickedSubItemValue, 'click');
+        onSubItemSelected(event, {
+          subItem: clickedSubItem,
+          subItemValue: clickedSubItemValue,
+          method: 'click'
+        });
+      }
       closeSuggestions('click');
 
       if (focusInputOnSuggestionClick === true) {
@@ -317,14 +413,16 @@ class Autosuggest extends Component {
         onBlur && onBlur(this.onBlurEvent);
       }
 
-      this.maybeCallOnSuggestionsUpdateRequested({ value: clickedSuggestionValue, reason: 'click' });
+      this.maybeCallOnSuggestionsUpdateRequested({ value: value, reason: 'click' });
 
       this.justClickedOnSuggestion = false;
     };
-    const itemProps = ({ sectionIndex, itemIndex }) => {
+    const itemProps = ({ sectionIndex, itemIndex, subItemIndex, isPrimaryFocused }) => {
       return {
         'data-section-index': sectionIndex,
         'data-suggestion-index': itemIndex,
+        subItemIndex,
+        isPrimaryFocused,
         onMouseEnter,
         onMouseLeave,
         onMouseDown,
@@ -336,12 +434,17 @@ class Autosuggest extends Component {
 
     return (
       <Autowhatever multiSection={multiSection}
+                    multiLevel={multiLevel}
                     items={items}
+                    subItems={localSubItems}
                     renderItem={renderItem}
+                    renderSubItem={renderSubItem}
                     renderSectionTitle={renderSectionTitle}
                     getSectionItems={getSectionSuggestions}
                     focusedSectionIndex={focusedSectionIndex}
                     focusedItemIndex={focusedSuggestionIndex}
+                    focusedSubItemIndex={focusedSubItemIndex}
+                    isPrimaryFocused={isPrimaryFocused}
                     inputProps={autowhateverInputProps}
                     itemProps={itemProps}
                     theme={theme}

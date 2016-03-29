@@ -26,11 +26,13 @@ export function inputChanged(shouldRenderSuggestions, lastAction) {
   };
 }
 
-export function updateFocusedSuggestion(sectionIndex, suggestionIndex, value) {
+export function updateFocusedSuggestion(sectionIndex, suggestionIndex, subItemIndex, isPrimaryFocused, value) {
   return {
     type: UPDATE_FOCUSED_SUGGESTION,
     sectionIndex,
     suggestionIndex,
+    subItemIndex,
+    isPrimaryFocused,
     value
   };
 }
@@ -63,6 +65,8 @@ export default function reducer(state, action) {
         isFocused: false,
         focusedSectionIndex: null,
         focusedSuggestionIndex: null,
+        focusedSubItemIndex: null,
+        isPrimaryFocused: true,
         valueBeforeUpDown: null,
         isCollapsed: true
       };
@@ -72,13 +76,15 @@ export default function reducer(state, action) {
         ...state,
         focusedSectionIndex: null,
         focusedSuggestionIndex: null,
+        focusedSubItemIndex: null,
         valueBeforeUpDown: null,
+        isPrimaryFocused: true,
         isCollapsed: !action.shouldRenderSuggestions,
         lastAction: action.lastAction
       };
 
     case UPDATE_FOCUSED_SUGGESTION: {
-      const { value, sectionIndex, suggestionIndex } = action;
+      const { value, sectionIndex, suggestionIndex, subItemIndex, isPrimaryFocused } = action;
       const valueBeforeUpDown =
         state.valueBeforeUpDown === null && typeof value !== 'undefined'
           ? value
@@ -88,6 +94,8 @@ export default function reducer(state, action) {
         ...state,
         focusedSectionIndex: sectionIndex,
         focusedSuggestionIndex: suggestionIndex,
+        focusedSubItemIndex: subItemIndex,
+        isPrimaryFocused: isPrimaryFocused,
         valueBeforeUpDown
       };
     }
@@ -103,6 +111,8 @@ export default function reducer(state, action) {
         ...state,
         focusedSectionIndex: null,
         focusedSuggestionIndex: null,
+        focusedSubItemIndex: null,
+        isPrimaryFocused: true,
         valueBeforeUpDown: null,
         isCollapsed: true,
         lastAction: action.lastAction

@@ -15,7 +15,10 @@ const defaultTheme = {
   suggestionFocused: 'react-autosuggest__suggestion--focused',
   sectionContainer: 'react-autosuggest__section-container',
   sectionTitle: 'react-autosuggest__section-title',
-  sectionSuggestionsContainer: 'react-autosuggest__section-suggestions-container'
+  sectionSuggestionsContainer: 'react-autosuggest__section-suggestions-container',
+  subItemsContainer: 'react-autowhatever__subitems-container',
+  subItem: 'react-autowhatever__subitem',
+  subItemFocused: 'react-autowhatever__subitem--focused'
 };
 
 function mapToAutowhateverTheme(theme) {
@@ -50,9 +53,12 @@ function mapToAutowhateverTheme(theme) {
 export default class AutosuggestContainer extends Component {
   static propTypes = {
     suggestions: PropTypes.array.isRequired,
+    subItems: PropTypes.array,
     onSuggestionsUpdateRequested: PropTypes.func,
     getSuggestionValue: PropTypes.func.isRequired,
+    getSubItemValue: PropTypes.func,
     renderSuggestion: PropTypes.func.isRequired,
+    renderSubItem: PropTypes.func,
     inputProps: (props, propName) => {
       const inputProps = props[propName];
 
@@ -66,7 +72,10 @@ export default class AutosuggestContainer extends Component {
     },
     shouldRenderSuggestions: PropTypes.func,
     onSuggestionSelected: PropTypes.func,
+    onSubItemSelected: PropTypes.func,
     multiSection: PropTypes.bool,
+    multiLevel: PropTypes.bool,
+    isPrimaryFocused: PropTypes.bool,
     renderSectionTitle: PropTypes.func,
     getSectionSuggestions: PropTypes.func,
     focusInputOnSuggestionClick: PropTypes.bool,
@@ -78,9 +87,14 @@ export default class AutosuggestContainer extends Component {
     onSuggestionsUpdateRequested: noop,
     shouldRenderSuggestions: value => value.trim().length > 0,
     onSuggestionSelected: noop,
+    onSubItemSelected: noop,
     multiSection: false,
+    multiLevel: false,
     renderSectionTitle() {
       throw new Error('`renderSectionTitle` must be provided');
+    },
+    renderSubItem() {
+      throw new Error('`renderSubItem` must be provided');
     },
     getSectionSuggestions() {
       throw new Error('`getSectionSuggestions` must be provided');
@@ -98,6 +112,8 @@ export default class AutosuggestContainer extends Component {
       isCollapsed: true,
       focusedSectionIndex: null,
       focusedSuggestionIndex: null,
+      focusedSubItemIndex: null,
+      isPrimaryFocused: true,
       valueBeforeUpDown: null,
       lastAction: null
     };
@@ -113,24 +129,30 @@ export default class AutosuggestContainer extends Component {
 
   render() {
     const {
-      multiSection, shouldRenderSuggestions, suggestions,
-      onSuggestionsUpdateRequested, getSuggestionValue, renderSuggestion,
-      renderSectionTitle, getSectionSuggestions, inputProps,
-      onSuggestionSelected, focusInputOnSuggestionClick, theme, id
+      multiSection, multiLevel, shouldRenderSuggestions, suggestions,
+      subItems, onSuggestionsUpdateRequested, getSuggestionValue, getSubItemValue,
+      renderSuggestion, renderSubItem, renderSectionTitle, getSectionSuggestions,
+      inputProps, onSuggestionSelected, onSubItemSelected, focusInputOnSuggestionClick,
+      theme, id
     } = this.props;
 
     return (
       <Provider store={this.store}>
         <Autosuggest multiSection={multiSection}
+                     multiLevel={multiLevel}
                      shouldRenderSuggestions={shouldRenderSuggestions}
                      suggestions={suggestions}
+                     subItems={subItems}
                      onSuggestionsUpdateRequested={onSuggestionsUpdateRequested}
                      getSuggestionValue={getSuggestionValue}
+                     getSubItemValue={getSubItemValue}
                      renderSuggestion={renderSuggestion}
+                     renderSubItem={renderSubItem}
                      renderSectionTitle={renderSectionTitle}
                      getSectionSuggestions={getSectionSuggestions}
                      inputProps={inputProps}
                      onSuggestionSelected={onSuggestionSelected}
+                     onSubItemSelected={onSubItemSelected}
                      focusInputOnSuggestionClick={focusInputOnSuggestionClick}
                      theme={mapToAutowhateverTheme(theme)}
                      id={id}
