@@ -11,7 +11,12 @@ import { escapeRegexCharacters } from 'utils/utils';
 const focusInputOnSuggestionClick = !isMobile.any;
 
 function getSuggestions(value) {
-  const escapedValue = escapeRegexCharacters(value.trim());
+  let flattenedValue = value;
+
+  if (value.name) {
+    flattenedValue = value.name;
+  }
+  const escapedValue = escapeRegexCharacters(flattenedValue.trim());
 
   if (escapedValue === '') {
     return [];

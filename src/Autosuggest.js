@@ -365,15 +365,27 @@ class Autosuggest extends Component {
           valueBeforeUpDown :
           this.getSubItemValueByIndex(subItemIndex);
 
-        updateFocusedSuggestion(sectionIndex, itemIndex, subItemIndex, isPrimaryFocused, value);
+        updateFocusedSuggestion(focusedSectionIndex, focusedSuggestionIndex, subItemIndex, isPrimaryFocused, value);
         this.maybeCallOnChange(event, newValue, 'mouseEnterSubMenu');
       }
     };
     const onMouseLeave = (event, { isPrimaryFocused }) => {
-      updateFocusedSuggestion(null, null, null, true);
+      let value = value;
+
+      if (multiLevel && isPrimaryFocused) {
+        if (subItems && subItems.length > 0) {
+          updateFocusedSuggestion(focusedSectionIndex, focusedSuggestionIndex, null, true, value);
+        } else {
+          value = valueBeforeUpDown;
+          updateFocusedSuggestion(null, null, null, true, value);
+        }
+      } else {
+        value = valueBeforeUpDown;
+        updateFocusedSuggestion(focusedSectionIndex, focusedSuggestionIndex, null, true, value);
+      }
       const method = isPrimaryFocused ? 'mouseLeave' : 'mouseLeaveSubMenu';
 
-      this.maybeCallOnChange(event, null, method);
+      this.maybeCallOnChange(event, value, method);
     };
     const onMouseDown = () => {
       this.justClickedOnSuggestion = true;
@@ -386,6 +398,7 @@ class Autosuggest extends Component {
         const clickedSuggestionValue = this.props.getSuggestionValue(clickedSuggestion);
 
         value = clickedSuggestionValue;
+        console.log(value);
         this.maybeCallOnChange(event, clickedSuggestionValue, 'click');
         onSuggestionSelected(event, {
           suggestion: clickedSuggestion,
@@ -397,6 +410,7 @@ class Autosuggest extends Component {
         const clickedSubItemValue = this.props.getSubItemValue(clickedSubItem);
 
         value = clickedSubItemValue;
+        console.log(value);
         this.maybeCallOnChange(event, clickedSubItemValue, 'click');
         onSubItemSelected(event, {
           subItem: clickedSubItem,
