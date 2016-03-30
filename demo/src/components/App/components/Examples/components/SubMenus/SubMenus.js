@@ -105,7 +105,7 @@ export default class SubMenus extends Component {
       });
     } else if (method == 'mouseLeave' || method == 'mouseLeaveSubMenu') {
       this.setState({
-        value: ''
+        value: newValue.name ? newValue.name : newValue
       });
     } else if (this.state.isPrimary) {
       this.setState({

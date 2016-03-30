@@ -370,22 +370,18 @@ class Autosuggest extends Component {
       }
     };
     const onMouseLeave = (event, { isPrimaryFocused }) => {
-      let value = value;
-
       if (multiLevel && isPrimaryFocused) {
         if (subItems && subItems.length > 0) {
-          updateFocusedSuggestion(focusedSectionIndex, focusedSuggestionIndex, null, true, value);
+          updateFocusedSuggestion(focusedSectionIndex, focusedSuggestionIndex, null, true, valueBeforeUpDown);
         } else {
-          value = valueBeforeUpDown;
-          updateFocusedSuggestion(null, null, null, true, value);
+          updateFocusedSuggestion(null, null, null, true, valueBeforeUpDown);
         }
       } else {
-        value = valueBeforeUpDown;
-        updateFocusedSuggestion(focusedSectionIndex, focusedSuggestionIndex, null, true, value);
+        updateFocusedSuggestion(focusedSectionIndex, focusedSuggestionIndex, null, true, valueBeforeUpDown);
       }
       const method = isPrimaryFocused ? 'mouseLeave' : 'mouseLeaveSubMenu';
 
-      this.maybeCallOnChange(event, value, method);
+      this.maybeCallOnChange(event, valueBeforeUpDown, method);
     };
     const onMouseDown = () => {
       this.justClickedOnSuggestion = true;
