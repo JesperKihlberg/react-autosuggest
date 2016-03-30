@@ -73,9 +73,8 @@ export default class SubMenus extends Component {
     this.onChange = this.onChange.bind(this);
     this.onSuggestionsUpdateRequested = this.onSuggestionsUpdateRequested.bind(this);
   }
-
   onChange(event, { newValue, method }) {
-    if (newValue) {
+    if (newValue && newValue.name) {
       this.setState({
         value: newValue.name
       });
@@ -86,32 +85,30 @@ export default class SubMenus extends Component {
       });
     } else if (method == 'left' || method == 'type') {
       this.setState({
-        isPrimary: true
+        isPrimary: true,
+        value: newValue.name ? newValue.name : newValue
       });
     } else if (method == 'mouseEnter') {
-      if (newValue.submenu) {
-        this.setState({
-          value: newValue.name,
-          subItems: newValue.submenu,
-          isPrimary: true
-        });
-      } else {
-        this.setState({
-          value: newValue.name
-        });
-      }
-    } else if (method == 'mouseLeave') {
-      if (!this.state.isPrimary) {
-        this.setState({
-          value: newValue.name
-        });
-      }
+      this.setState({
+        value: newValue.name,
+        subItems: newValue.submenu,
+        isPrimary: true
+      });
+    } else if (method == 'mouseEnterSubMenu') {
+      this.setState({
+        value: newValue.name
+      });
+    } else if (method == 'mouseLeave' || method == 'mouseLeaveSubMenu') {
+      this.setState({
+        value: ''
+      });
     } else if (this.state.isPrimary) {
       this.setState({
         value: newValue.name,
         subItems: newValue.submenu
       });
     }
+
   }
 
   onSuggestionsUpdateRequested({ value }) {
@@ -135,10 +132,10 @@ export default class SubMenus extends Component {
       <div id="submenus-example" className={styles.container}>
         <div className={styles.textContainer}>
           <div className={styles.title}>
-            Multiple sections
+            Two levels
           </div>
           <div className={styles.description}>
-            Suggestions can also be presented in multiple sections.
+            Suggestions can also be presented with submenus.
           </div>
           <Link className={styles.codepenLink}
                 href="http://codepen.io/moroshko/pen/qbRNjV" underline={false}>
