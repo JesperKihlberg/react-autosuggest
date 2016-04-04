@@ -394,7 +394,6 @@ class Autosuggest extends Component {
         const clickedSuggestionValue = this.props.getSuggestionValue(clickedSuggestion);
 
         value = clickedSuggestionValue;
-        console.log(value);
         this.maybeCallOnChange(event, clickedSuggestionValue, 'click');
         onSuggestionSelected(event, {
           suggestion: clickedSuggestion,
@@ -406,7 +405,6 @@ class Autosuggest extends Component {
         const clickedSubItemValue = this.props.getSubItemValue(clickedSubItem);
 
         value = clickedSubItemValue;
-        console.log(value);
         this.maybeCallOnChange(event, clickedSubItemValue, 'click');
         onSubItemSelected(event, {
           subItem: clickedSubItem,
