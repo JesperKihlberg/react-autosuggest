@@ -297,8 +297,9 @@ class Autosuggest extends Component {
 
             if (focusedSuggestion !== null) {
               const { isPrimaryFocused } = data;
-
-              closeSuggestions('enter');
+              if (!this.willRenderSuggestions()) {
+                closeSuggestions('enter');
+              }
               if (isPrimaryFocused) {
                 const focusedSuggestionValue = this.props.getSuggestionValue(focusedSuggestion);
 
@@ -412,7 +413,9 @@ class Autosuggest extends Component {
           method: 'click'
         });
       }
-      closeSuggestions('click');
+      if (!this.willRenderSuggestions()) {
+        closeSuggestions('click');
+      }
 
       if (focusInputOnSuggestionClick === true) {
         this.input.focus();
