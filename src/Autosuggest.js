@@ -264,9 +264,9 @@ class Autosuggest extends Component {
                 this.maybeCallOnChange(event, newValue, event.key === 'ArrowDown' ? 'down' : 'up');
               } else {
                 const newValue = newFocusedSubItemIndex === null ?
-                    valueBeforeUpDown :
+                    this.getSuggestionValueByIndex(newFocusedSectionIndex, newFocusedItemIndex) :
                     this.getSubItemValueByIndex(newFocusedSubItemIndex);
-                    
+
                 updateFocusedSuggestion(focusedSectionIndex, focusedItemIndex, newFocusedSubItemIndex, isPrimaryFocused, value);
                 this.maybeCallOnChange(event, newValue, event.key === 'ArrowDown' ? 'down' : 'up');
               }
@@ -363,7 +363,7 @@ class Autosuggest extends Component {
         this.maybeCallOnChange(event, newValue, 'mouseEnter');
       } else {
         const newValue = subItemIndex === null ?
-          valueBeforeUpDown :
+          this.getSuggestionValueByIndex(focusedSectionIndex, focusedItemIndex) :
           this.getSubItemValueByIndex(subItemIndex);
 
         updateFocusedSuggestion(focusedSectionIndex, focusedSuggestionIndex, subItemIndex, isPrimaryFocused, value);
@@ -371,18 +371,23 @@ class Autosuggest extends Component {
       }
     };
     const onMouseLeave = (event, { isPrimaryFocused }) => {
+      const method = isPrimaryFocused ? 'mouseLeave' : 'mouseLeaveSubMenu';
+
       if (multiLevel && isPrimaryFocused) {
         if (subItems && subItems.length > 0) {
           updateFocusedSuggestion(focusedSectionIndex, focusedSuggestionIndex, null, true, valueBeforeUpDown);
+          this.maybeCallOnChange(event, valueBeforeUpDown, method);
         } else {
           updateFocusedSuggestion(null, null, null, true, valueBeforeUpDown);
+          this.maybeCallOnChange(event, valueBeforeUpDown, method);
         }
       } else {
-        updateFocusedSuggestion(focusedSectionIndex, focusedSuggestionIndex, null, true, valueBeforeUpDown);
-      }
-      const method = isPrimaryFocused ? 'mouseLeave' : 'mouseLeaveSubMenu';
+        const newValue = this.getSuggestionValueByIndex(focusedSectionIndex, focusedSuggestionIndex);
 
-      this.maybeCallOnChange(event, valueBeforeUpDown, method);
+        updateFocusedSuggestion(focusedSectionIndex, focusedSuggestionIndex, null, true, valueBeforeUpDown);
+        this.maybeCallOnChange(event, newValue, method);
+      }
+
     };
     const onMouseDown = () => {
       this.justClickedOnSuggestion = true;
