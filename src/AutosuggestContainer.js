@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react';
 import { createStore } from 'redux';
-import { Provider } from 'react-redux';
 import reducer from './reducerAndActions';
 import Autosuggest from './Autosuggest';
 
@@ -137,27 +136,26 @@ export default class AutosuggestContainer extends Component {
     } = this.props;
 
     return (
-      <Provider store={this.store}>
-        <Autosuggest multiSection={multiSection}
+      <Autosuggest multiSection={multiSection}
                      multiLevel={multiLevel}
-                     shouldRenderSuggestions={shouldRenderSuggestions}
-                     suggestions={suggestions}
+                   shouldRenderSuggestions={shouldRenderSuggestions}
+                   suggestions={suggestions}
                      subItems={subItems}
-                     onSuggestionsUpdateRequested={onSuggestionsUpdateRequested}
-                     getSuggestionValue={getSuggestionValue}
+                   onSuggestionsUpdateRequested={onSuggestionsUpdateRequested}
+                   getSuggestionValue={getSuggestionValue}
                      getSubItemValue={getSubItemValue}
-                     renderSuggestion={renderSuggestion}
+                   renderSuggestion={renderSuggestion}
                      renderSubItem={renderSubItem}
-                     renderSectionTitle={renderSectionTitle}
-                     getSectionSuggestions={getSectionSuggestions}
-                     inputProps={inputProps}
-                     onSuggestionSelected={onSuggestionSelected}
+                   renderSectionTitle={renderSectionTitle}
+                   getSectionSuggestions={getSectionSuggestions}
+                   inputProps={inputProps}
+                   onSuggestionSelected={onSuggestionSelected}
                      onSubItemSelected={onSubItemSelected}
-                     focusInputOnSuggestionClick={focusInputOnSuggestionClick}
-                     theme={mapToAutowhateverTheme(theme)}
-                     id={id}
-                     inputRef={this.saveInput} />
-      </Provider>
+                   focusInputOnSuggestionClick={focusInputOnSuggestionClick}
+                   theme={mapToAutowhateverTheme(theme)}
+                   id={id}
+                   inputRef={this.saveInput}
+                   store={this.store} />
     );
   }
 }

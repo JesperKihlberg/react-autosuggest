@@ -306,6 +306,7 @@ class Autosuggest extends Component {
                 onSuggestionSelected(event, {
                   suggestion: focusedSuggestion,
                   suggestionValue: focusedSuggestionValue,
+                sectionIndex: focusedSectionIndex,
                   method: 'enter'
                 });
                 this.maybeCallOnSuggestionsUpdateRequested({ value, reason: 'enter' });
@@ -404,6 +405,7 @@ class Autosuggest extends Component {
         onSuggestionSelected(event, {
           suggestion: clickedSuggestion,
           suggestionValue: clickedSuggestionValue,
+        sectionIndex,
           method: 'click'
         });
       } else {
@@ -431,7 +433,9 @@ class Autosuggest extends Component {
 
       this.maybeCallOnSuggestionsUpdateRequested({ value: value, reason: 'click' });
 
-      this.justClickedOnSuggestion = false;
+      setTimeout(() => {
+        this.justClickedOnSuggestion = false;
+      });
     };
     const itemProps = ({ sectionIndex, itemIndex, subItemIndex, isPrimaryFocused }) => {
       return {
