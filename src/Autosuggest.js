@@ -50,6 +50,7 @@ class Autosuggest extends Component {
     renderSuggestion: PropTypes.func.isRequired,
     renderSubItem: PropTypes.func,
     inputProps: PropTypes.object.isRequired,
+    input: PropTypes.func,
     shouldRenderSuggestions: PropTypes.func.isRequired,
     onSuggestionSelected: PropTypes.func.isRequired,
     onSubItemSelected: PropTypes.func,
@@ -205,7 +206,7 @@ class Autosuggest extends Component {
 
   render() {
     const {
-      suggestions, subItems, renderSuggestion, renderSubItem, inputProps, shouldRenderSuggestions,
+      suggestions, subItems, renderSuggestion, renderSubItem, inputProps, input, shouldRenderSuggestions,
       onSuggestionSelected, onSubItemSelected, multiSection, multiLevel, renderSectionTitle, id,
       getSectionSuggestions, focusInputOnSuggestionClick, theme, isFocused,
       isCollapsed, focusedSectionIndex, focusedSuggestionIndex, focusedSubItemIndex, isPrimaryFocused,
@@ -405,7 +406,7 @@ class Autosuggest extends Component {
         onSuggestionSelected(event, {
           suggestion: clickedSuggestion,
           suggestionValue: clickedSuggestionValue,
-        sectionIndex,
+          sectionIndex,
           method: 'click'
         });
       } else {
@@ -466,6 +467,7 @@ class Autosuggest extends Component {
                     focusedSubItemIndex={focusedSubItemIndex}
                     isPrimaryFocused={isPrimaryFocused}
                     inputProps={autowhateverInputProps}
+                    input={input}
                     itemProps={itemProps}
                     theme={theme}
                     id={id}

@@ -5,6 +5,7 @@ import Basic from 'Basic/Basic';
 import MultipleSections from 'MultipleSections/MultipleSections';
 import CustomRender from 'CustomRender/CustomRender';
 import SubMenus from 'SubMenus/SubMenus';
+import CustomInput from 'CustomInput/CustomInput';
 
 export default function Examples() {
   return (
@@ -16,6 +17,7 @@ export default function Examples() {
       <MultipleSections />
       <CustomRender />
       <SubMenus />
+      <CustomInput />
     </div>
   );
 };
